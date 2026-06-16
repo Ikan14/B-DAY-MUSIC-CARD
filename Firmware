@@ -1,1 +1,100 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+// --- SS ---
+LiquidCrystal_I2C lcd(0x27, 16, 2); 
+
+// --- Buzzer & Music Settings ---
+int speakerPin = 4; 
+int length = 28;    
+char notes[] = "GGAGcB GGAGdc GGxecBA yyecdc";
+int beats[] = {2,2,8,8,8,16,1,2,2,8,8,8,16,1,2,2,8,8,8,8,16,1,2,2,8,8,8,16};
+
+// Adjust the base beat value to match a tempo of 105 BPM
+//  (60,000 ms / 105 BPM) / 4 (your beat code scale divisor) = ~143 ms
+int tempo = 143; 
+
+// =========================================================================
+// [ PLACE TO WRITE YOUR TEXT ]
+// Write your message freely! and in full within these quotation marks
+// Give them a space at the beginning and end so that the text appears and disappears neatly.
+// =========================================================================
+String runningText = "                HAPPY B-DAY YE OLD MAN!...                ";
+int textPosition = 0; 
+// =========================================================================
+
+void playTone(int tone, int duration) {
+    for (long i = 0; i < duration * 1000L; i += tone * 2) {
+        digitalWrite(speakerPin, HIGH);
+        delayMicroseconds(tone);
+        digitalWrite(speakerPin, LOW);
+        delayMicroseconds(tone);
+    }
+}
+
+void playNote(char note, int duration) {
+    char names[] = {'C', 'D', 'E', 'F', 'G', 'A', 'B',           
+                    'c', 'd', 'e', 'f', 'g', 'a', 'b',
+                    'x', 'y' };
+
+    int tones[] = { 1915, 1700, 1519, 1432, 1275, 1136, 1014,
+                     956,  834,  765,  593,  468,  346,  224,
+                     655 , 715 };
+
+    int SPEE = 5;
+
+    for (int i = 0; i < 17; i++) {
+        if (names[i] == note) {
+            int newduration = duration / SPEE;
+            playTone(tones[i], newduration);
+        }
+    }
+}
+
+void setup() {
+    pinMode(speakerPin, OUTPUT);
+
+    lcd.init();
+    lcd.backlight();
+
+    // Initial title on the first line of the LCD
+    lcd.setCursor(0, 0);
+    lcd.print("Music Box");
+    lcd.setCursor(0, 1);
+    lcd.print("Playing: H-BDAY ");Clear the bottom row before the scrolling text begins
+    delay(2000); 
+    
+    //Clear the bottom row before the Running text begins
+    lcd.setCursor(0, 1);
+    lcd.print("                ");
+}
+
+void loop() {
+    for (int i = 0; i < length; i++) {
+        // --- MAIN LOGIC RUNNING TEXT ---
+        lcd.setCursor(0, 1);
+        // Extract a 16-character segment from the entire sentence based on the current index position
+        lcd.print(runningText.substring(textPosition, textPosition + 16));
+        
+        // Swipe the text index to the left for the next note/loop
+        textPosition++;
+        if (textPosition > (runningText.length() - 16)) {
+            textPosition = 0; // Reset to the beginning if all sentences have been completed
+        }
+
+        // ---  ---
+        if (notes[i] == ' ') {
+            delay(beats[i] * tempo); 
+        } else {
+            playNote(notes[i], beats[i] * tempo);
+        }
+        
+        delay(tempo);
+    }
+    
+    // Brief pause before it starts over again
+    lcd.setCursor(0, 1);
+    lcd.print("Restarting...   ");
+    delay(2000);
+}
 
