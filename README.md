@@ -30,7 +30,7 @@ In the "B-DAY MUSIC BOX.pdf" folder
 BOM Files on the /BOM (Bill Of Materials) folder ;)
 
 ## Firmware
-FIrmware is on the /Firmware folder and it is written using Arduino IDE
+Firmware is on the /Firmware folder and it is written using Arduino IDE
 
 ## Files Included
 - CAD files (.STEP & source)
